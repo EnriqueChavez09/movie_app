@@ -9,7 +9,7 @@ class Environment {
 
 class CustomColors {
   static final primaryColor = Color(0xFFFFFFFF);
-  static final secondaryColor = Color(0xFF29F5BE);
+  static final secondaryColor = Color.fromARGB(255, 245, 234, 14);
   static final tertiaryColor = Color(0xFF20282B);
   static final quaternaryColor = Color(0xFF512DA8);
   static final quintonaryColor = Color(0xFF404B52);

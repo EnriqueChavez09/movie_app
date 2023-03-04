@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movie_app/pages/home_page.dart';
+import 'package:movie_app/pages/pages.dart';
 
 class AppRoutes {
   static const initialRoute = 'home';
@@ -7,7 +7,7 @@ class AppRoutes {
   static Map<String, Widget Function(BuildContext)> getAppRoutes() {
     Map<String, Widget Function(BuildContext)> appRoutes = {};
     appRoutes.addAll({'home': (BuildContext context) => HomePage()});
-    // appRoutes.addAll({'scanner': (BuildContext context) => ScannerPage()});
+    appRoutes.addAll({'detail': (BuildContext context) => DetailPage()});
     // appRoutes.addAll({'register': (BuildContext context) => RegisterPage()});
     // appRoutes.addAll({'history': (BuildContext context) => HistoryPage()});
     return appRoutes;

@@ -35,20 +35,51 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GridView.builder(
-        padding: const EdgeInsets.all(12.0),
-        itemCount: moviesModel.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 12.0,
-          crossAxisSpacing: 12.0,
-          childAspectRatio: 0.7,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                "TotalCinema",
+                style: TextStyle(
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.w600,
+                  color: CustomColors.primaryColor,
+                ),
+              ),
+            ),
+            Expanded(
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(12.0),
+                itemCount: moviesModel.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12.0,
+                  crossAxisSpacing: 12.0,
+                  childAspectRatio: 0.7,
+                ),
+                itemBuilder: (BuildContext context, int index) {
+                  return ItemMovieWidget(
+                    movie: moviesModel[index],
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        "detail",
+                        arguments: MovieArgumentModel(
+                          id: moviesModel[index].id,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-        itemBuilder: (BuildContext context, int index) {
-          return ItemMovieWidget(
-            movie: moviesModel[index],
-          );
-        },
       ),
     );
   }

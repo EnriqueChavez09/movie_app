@@ -66,3 +66,10 @@ class MovieModel {
         "vote_count": voteCount,
       };
 }
+
+class MovieArgumentModel {
+  MovieArgumentModel({
+    this.id,
+  });
+  int? id;
+}
