@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movie_app/models/pages/pages.dart';
+import 'package:movie_app/pages/home_page.dart';
 
 class AppRoutes {
   static const initialRoute = 'home';
