@@ -34,6 +34,8 @@ class _detailPage extends StatefulWidget {
 class _detailPageState extends State<_detailPage> {
   MovieDetailModel? movieDetailModel;
   List<CastModel> listCastsModel = [];
+  List<BackdropModel> listBackdropsModel = [];
+  List<ReviewModel> listReviewsModel = [];
   final String _baseUrlImage = Environment.apiUrlImage;
 
   getData() async {
@@ -41,6 +43,8 @@ class _detailPageState extends State<_detailPage> {
     int id = widget.movieArgument.id!;
     movieDetailModel = await apiService.getMovie(id);
     listCastsModel = await apiService.getCasts(id);
+    listBackdropsModel = await apiService.getBackdrops(id);
+    listReviewsModel = await apiService.getReviews(id);
     setState(() {});
   }
 
@@ -304,14 +308,16 @@ class _detailPageState extends State<_detailPage> {
                           child: GridView.builder(
                             shrinkWrap: true,
                             physics: const ScrollPhysics(),
-                            itemCount: 10,
+                            itemCount: listBackdropsModel.length >= 10
+                                ? 10
+                                : listBackdropsModel.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                             ),
                             itemBuilder: (BuildContext context, int index) {
-                              return Image.asset(
-                                "assets/images/portada.jpg",
+                              return Image.network(
+                                "$_baseUrlImage${listBackdropsModel[index].filePath}",
                                 fit: BoxFit.cover,
                               );
                             },
@@ -331,66 +337,14 @@ class _detailPageState extends State<_detailPage> {
                         const SizedBox(
                           height: 20.0,
                         ),
-                        ExpansionTile(
-                          iconColor: CustomColors.tertiaryColor,
-                          collapsedIconColor: CustomColors.primaryColor,
-                          childrenPadding: const EdgeInsets.symmetric(
-                            horizontal: 10.0,
-                            vertical: 6.0,
-                          ),
-                          tilePadding: const EdgeInsets.symmetric(
-                            horizontal: 6.0,
-                          ),
-                          title: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor:
-                                    CustomColors.primaryColor.withOpacity(0.1),
-                                child: Text(
-                                  "7.3",
-                                  style: TextStyle(
-                                    color: CustomColors.primaryColor,
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10.0,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Juan Manuel Gonzales",
-                                    style: TextStyle(
-                                      color: CustomColors.primaryColor,
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    "2022-11-14",
-                                    style: TextStyle(
-                                      color: CustomColors.primaryColor
-                                          .withOpacity(0.6),
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        Column(
                           children: [
-                            Text(
-                              "Officia duis deserunt mollit aute adipisicing excepteur exercitation dolore irure et officia. Deserunt Lorem cupidatat eiusmod quis velit aute dolor eiusmod exercitation velit voluptate fugiat. Magna officia aliqua laboris nostrud excepteur ea fugiat incididunt.",
-                              style: TextStyle(
-                                color: CustomColors.primaryColor,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w600,
+                            ...List.generate(
+                              listReviewsModel.length,
+                              (index) => ItemReviewWidget(
+                                review: listReviewsModel[index],
                               ),
-                            ),
+                            )
                           ],
                         ),
                       ],

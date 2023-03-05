@@ -32,16 +32,51 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Text(
-                "TotalCinema",
-                style: TextStyle(
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.w600,
-                  color: CustomColors.primaryColor,
-                ),
-              ),
-            ),
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "TotalCinema",
+                      style: TextStyle(
+                        fontSize: 28.0,
+                        fontWeight: FontWeight.w600,
+                        color: CustomColors.primaryColor,
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          ...List.generate(
+                            10,
+                            (index) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "action",
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: CustomColors.primaryColor,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 50.0,
+                                    height: 3.5,
+                                    color: CustomColors.tertiaryColor,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                )),
             Expanded(
               child: GridView.builder(
                 shrinkWrap: true,

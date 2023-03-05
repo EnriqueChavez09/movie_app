@@ -35,4 +35,25 @@ class ApiService {
     listCastsModel = casts.map((e) => CastModel.fromJson(e)).toList();
     return listCastsModel;
   }
+
+  Future<List<BackdropModel>> getBackdrops(int id) async {
+    Uri url = Uri.parse("${baseUrl}movie/$id/images?api_key=$apiKey");
+    http.Response response = await http.get(url);
+    Map<String, dynamic> data = json.decode(response.body);
+    List backdrops = data["backdrops"];
+    List<BackdropModel> listBackdropsModel = [];
+    listBackdropsModel =
+        backdrops.map((e) => BackdropModel.fromJson(e)).toList();
+    return listBackdropsModel;
+  }
+
+  Future<List<ReviewModel>> getReviews(int id) async {
+    Uri url = Uri.parse("${baseUrl}movie/$id/reviews?api_key=$apiKey");
+    http.Response response = await http.get(url);
+    Map<String, dynamic> data = json.decode(response.body);
+    List reviews = data["results"];
+    List<ReviewModel> listReviewsModel = [];
+    listReviewsModel = reviews.map((e) => ReviewModel.fromJson(e)).toList();
+    return listReviewsModel;
+  }
 }
