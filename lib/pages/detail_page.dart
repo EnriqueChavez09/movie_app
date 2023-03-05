@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:movie_app/globals/globals.dart';
 import 'package:movie_app/models/models.dart';
+import 'package:movie_app/services/api_service.dart';
+import 'package:movie_app/widgets/widgets.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailPage extends StatelessWidget {
   @override
@@ -8,154 +12,396 @@ class DetailPage extends StatelessWidget {
     double height = MediaQuery.of(context).size.height;
     final MovieArgumentModel movieArgument =
         ModalRoute.of(context)!.settings.arguments as MovieArgumentModel;
+    return _detailPage(
+      movieArgument: movieArgument,
+      height: height,
+    );
+  }
+}
+
+class _detailPage extends StatefulWidget {
+  MovieArgumentModel movieArgument;
+  double height;
+  _detailPage({
+    required this.movieArgument,
+    required this.height,
+  });
+
+  @override
+  State<_detailPage> createState() => _detailPageState();
+}
+
+class _detailPageState extends State<_detailPage> {
+  MovieDetailModel? movieDetailModel;
+  List<CastModel> listCastsModel = [];
+  final String _baseUrlImage = Environment.apiUrlImage;
+
+  getData() async {
+    ApiService apiService = ApiService();
+    int id = widget.movieArgument.id!;
+    movieDetailModel = await apiService.getMovie(id);
+    listCastsModel = await apiService.getCasts(id);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: height * 0.25,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: AssetImage(
-                    "assets/images/portada.jpg",
-                  ),
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.center,
-                        colors: [
-                          CustomColors.backgroundColor,
-                          Colors.transparent,
-                          Colors.transparent,
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 10.0,
-              ),
+      body: movieDetailModel != null
+          ? SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.star,
-                            color: CustomColors.secondaryColor,
-                            size: 16.0,
+                  Container(
+                    height: widget.height * 0.25,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(
+                          "$_baseUrlImage${movieDetailModel!.backdropPath}",
+                        ),
+                      ),
+                    ),
+                    child: Stack(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.center,
+                              colors: [
+                                CustomColors.backgroundColor,
+                                Colors.transparent,
+                                Colors.transparent,
+                                Colors.transparent,
+                              ],
+                            ),
                           ),
-                          RichText(
-                            text: TextSpan(
-                              text: "7.235",
-                              style: TextStyle(
-                                color: CustomColors.primaryColor,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: " | ",
-                                  style: TextStyle(
-                                    color: CustomColors.primaryColor,
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 10.0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  color: CustomColors.secondaryColor,
+                                  size: 16.0,
                                 ),
-                                TextSpan(
-                                  text: "45342",
-                                  style: TextStyle(
-                                    color: CustomColors.primaryColor,
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.w500,
+                                RichText(
+                                  text: TextSpan(
+                                    text: movieDetailModel!.voteAverage
+                                        .toString(),
+                                    style: TextStyle(
+                                      color: CustomColors.primaryColor,
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: " | ",
+                                        style: TextStyle(
+                                          color: CustomColors.primaryColor,
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: movieDetailModel!.voteCount
+                                            .toString(),
+                                        style: TextStyle(
+                                          color: CustomColors.primaryColor,
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    Uri url = Uri.parse(
+                                      "https://wa.me/51956346858?text=Hola",
+                                    );
+                                    launchUrl(url,
+                                        mode: LaunchMode.externalApplication);
+                                  },
+                                  icon: Icon(
+                                    Icons.whatshot_outlined,
+                                    color: CustomColors.primaryColor,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    Share.share(
+                                        "Película: ${movieDetailModel!.originalTitle} \nResumen: ${movieDetailModel!.overview} \nWeb:${movieDetailModel!.homepage}");
+                                  },
+                                  icon: Icon(
+                                    Icons.share_outlined,
+                                    color: CustomColors.primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Text(
+                          movieDetailModel!.originalTitle,
+                          style: TextStyle(
+                            color: CustomColors.primaryColor,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w700,
                           ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(
-                              Icons.whatshot_outlined,
-                              color: CustomColors.primaryColor,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "${movieDetailModel!.runtime} min",
+                              style: TextStyle(
+                                color: CustomColors.primaryColor,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10.0,
+                            ),
+                            Text(
+                              movieDetailModel!.releaseDate.year.toString(),
+                              style: TextStyle(
+                                color: CustomColors.primaryColor,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 12.0,
+                        ),
+                        Wrap(
+                          spacing: 6.0,
+                          children: [
+                            ...List.generate(
+                              movieDetailModel!.genres.length,
+                              (index) => Chip(
+                                label: Text(
+                                  movieDetailModel!.genres[index].name,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        Text(
+                          movieDetailModel!.overview,
+                          style: TextStyle(
+                            color: CustomColors.primaryColor,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Uri url = Uri.parse(movieDetailModel!.homepage);
+                            launchUrl(url,
+                                mode: LaunchMode.externalApplication);
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            height: 56.0,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.0),
+                              color: Colors.amber,
+                              gradient: LinearGradient(
+                                colors: [
+                                  CustomColors.tertiaryColor,
+                                  CustomColors.quaternaryColor,
+                                ],
+                              ),
+                            ),
+                            child: Text(
+                              "Homepage",
+                              style: TextStyle(
+                                color: CustomColors.primaryColor,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(
-                              Icons.share_outlined,
-                              color: CustomColors.primaryColor,
-                            ),
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        Text(
+                          "Top Cast",
+                          style: TextStyle(
+                            color: CustomColors.primaryColor,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Text(
-                    "Black Panther: Wakanda Forever",
-                    style: TextStyle(
-                      color: CustomColors.primaryColor,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        "162 min",
-                        style: TextStyle(
-                          color: CustomColors.primaryColor,
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w700,
                         ),
-                      ),
-                      const SizedBox(
-                        width: 10.0,
-                      ),
-                      Text(
-                        "2022",
-                        style: TextStyle(
-                          color: CustomColors.primaryColor,
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w700,
+                        const SizedBox(
+                          height: 20.0,
                         ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    "Ipsum nisi anim ullamco Lorem nulla nostrud excepteur officia ad. Dolor mollit aute elit quis enim. Ut reprehenderit et nulla cupidatat tempor dolore sint magna irure et elit. Anim quis est exercitation excepteur reprehenderit ad id fugiat officia.",
-                    style: TextStyle(
-                      color: CustomColors.primaryColor,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w700,
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: [
+                              ...List.generate(
+                                listCastsModel.length,
+                                (index) => ItemCastWidget(
+                                  cast: listCastsModel[index],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        Text(
+                          "Images",
+                          style: TextStyle(
+                            color: CustomColors.primaryColor,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        MediaQuery.removePadding(
+                          context: context,
+                          removeTop: true,
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const ScrollPhysics(),
+                            itemCount: 10,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                            ),
+                            itemBuilder: (BuildContext context, int index) {
+                              return Image.asset(
+                                "assets/images/portada.jpg",
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        Text(
+                          "Reviews",
+                          style: TextStyle(
+                            color: CustomColors.primaryColor,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        ExpansionTile(
+                          iconColor: CustomColors.tertiaryColor,
+                          collapsedIconColor: CustomColors.primaryColor,
+                          childrenPadding: const EdgeInsets.symmetric(
+                            horizontal: 10.0,
+                            vertical: 6.0,
+                          ),
+                          tilePadding: const EdgeInsets.symmetric(
+                            horizontal: 6.0,
+                          ),
+                          title: Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor:
+                                    CustomColors.primaryColor.withOpacity(0.1),
+                                child: Text(
+                                  "7.3",
+                                  style: TextStyle(
+                                    color: CustomColors.primaryColor,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10.0,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Juan Manuel Gonzales",
+                                    style: TextStyle(
+                                      color: CustomColors.primaryColor,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    "2022-11-14",
+                                    style: TextStyle(
+                                      color: CustomColors.primaryColor
+                                          .withOpacity(0.6),
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          children: [
+                            Text(
+                              "Officia duis deserunt mollit aute adipisicing excepteur exercitation dolore irure et officia. Deserunt Lorem cupidatat eiusmod quis velit aute dolor eiusmod exercitation velit voluptate fugiat. Magna officia aliqua laboris nostrud excepteur ea fugiat incididunt.",
+                              style: TextStyle(
+                                color: CustomColors.primaryColor,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
+            )
+          : Center(
+              child: CircularProgressIndicator(),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
