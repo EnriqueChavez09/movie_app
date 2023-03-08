@@ -8,13 +8,16 @@ final String baseUrl = Environment.apiUrl;
 final String apiKey = Environment.apiKey;
 
 class ApiService {
-  Future<List<MovieModel>> getMovies() async {
-    Uri url = Uri.parse("${baseUrl}discover/movie?api_key=$apiKey");
+  Future<List<MovieModel>> getMovies(int id, int page) async {
+    Uri url = id == 0
+        ? Uri.parse("${baseUrl}discover/movie?api_key=$apiKey&page=$page")
+        : Uri.parse("${baseUrl}genre/$id/movies?api_key=$apiKey");
     http.Response response = await http.get(url);
     Map data = json.decode(response.body);
     List movies = data["results"];
     List<MovieModel> listMoviesModel = [];
     listMoviesModel = movies.map((e) => MovieModel.fromJson(e)).toList();
+    print("Movies1!!!!!!! $page");
     return listMoviesModel;
   }
 
@@ -55,5 +58,15 @@ class ApiService {
     List<ReviewModel> listReviewsModel = [];
     listReviewsModel = reviews.map((e) => ReviewModel.fromJson(e)).toList();
     return listReviewsModel;
+  }
+
+  Future<List<GenreModel>> getGenres() async {
+    Uri url = Uri.parse("${baseUrl}genre/movie/list?api_key=$apiKey");
+    http.Response response = await http.get(url);
+    Map<String, dynamic> data = json.decode(response.body);
+    List genres = data["genres"];
+    List<GenreModel> listGenresModel = [];
+    listGenresModel = genres.map((e) => GenreModel.fromJson(e)).toList();
+    return listGenresModel;
   }
 }

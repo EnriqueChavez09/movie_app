@@ -1,3 +1,5 @@
+import 'package:movie_app/models/models.dart';
+
 class MovieDetailModel {
   MovieDetailModel({
     required this.adult,
@@ -31,7 +33,7 @@ class MovieDetailModel {
   String backdropPath;
   dynamic belongsToCollection;
   int budget;
-  List<Genre> genres;
+  List<GenreModel> genres;
   String homepage;
   int id;
   String imdbId;
@@ -59,7 +61,8 @@ class MovieDetailModel {
         backdropPath: json["backdrop_path"],
         belongsToCollection: json["belongs_to_collection"],
         budget: json["budget"],
-        genres: List<Genre>.from(json["genres"].map((x) => Genre.fromJson(x))),
+        genres: List<GenreModel>.from(
+            json["genres"].map((x) => GenreModel.fromJson(x))),
         homepage: json["homepage"],
         id: json["id"],
         imdbId: json["imdb_id"],
@@ -117,26 +120,6 @@ class MovieDetailModel {
         "video": video,
         "vote_average": voteAverage,
         "vote_count": voteCount,
-      };
-}
-
-class Genre {
-  Genre({
-    required this.id,
-    required this.name,
-  });
-
-  int id;
-  String name;
-
-  factory Genre.fromJson(Map<String, dynamic> json) => Genre(
-        id: json["id"],
-        name: json["name"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
       };
 }
 

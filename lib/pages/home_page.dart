@@ -10,18 +10,41 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<MovieModel> moviesModel = [];
+  List<MovieModel> listMoviesModel = [];
+  List<GenreModel> listGenresModel = [];
+  int idFilter = 0;
+  int pageMovies = 1;
+  ScrollController _movieScrollController = ScrollController();
 
-  getData() async {
+  getDataMovies(int id, int page) async {
     ApiService apiService = ApiService();
-    moviesModel = await apiService.getMovies();
+    List<MovieModel> listMoviesNewModel = await apiService.getMovies(id, page);
+    listMoviesModel = [...listMoviesModel, ...listMoviesNewModel];
+    setState(() {});
+    pageMovies++;
+  }
+
+  getDataGenres() async {
+    ApiService apiService = ApiService();
+    listGenresModel = await apiService.getGenres();
+    listGenresModel.insert(
+      0,
+      GenreModel(id: 0, name: "All"),
+    );
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    getData();
+    getDataMovies(idFilter, pageMovies);
+    getDataGenres();
+    _movieScrollController.addListener(() {
+      if (_movieScrollController.offset >=
+          _movieScrollController.position.maxScrollExtent) {
+        getDataMovies(idFilter, pageMovies);
+      }
+    });
   }
 
   @override
@@ -32,57 +55,48 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  children: [
-                    Text(
-                      "TotalCinema",
-                      style: TextStyle(
-                        fontSize: 28.0,
-                        fontWeight: FontWeight.w600,
-                        color: CustomColors.primaryColor,
-                      ),
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  Text(
+                    "TotalCinema",
+                    style: TextStyle(
+                      fontSize: 28.0,
+                      fontWeight: FontWeight.w600,
+                      color: CustomColors.primaryColor,
                     ),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          ...List.generate(
-                            10,
-                            (index) => Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0,
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    "action",
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                      color: CustomColors.primaryColor,
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 50.0,
-                                    height: 3.5,
-                                    color: CustomColors.tertiaryColor,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                )),
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        ...List.generate(
+                          listGenresModel.length,
+                          (index) => ItemCategoryWidget(
+                            genre: listGenresModel[index],
+                            isSelected: listGenresModel[index].id == idFilter,
+                            onTap: () {
+                              idFilter = listGenresModel[index].id;
+                              listMoviesModel = [];
+                              pageMovies = 1;
+                              getDataMovies(idFilter, pageMovies);
+                              setState(() {});
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: GridView.builder(
+                controller: _movieScrollController,
                 shrinkWrap: true,
-                physics: const BouncingScrollPhysics(),
+                // physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(12.0),
-                itemCount: moviesModel.length,
+                itemCount: listMoviesModel.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 12.0,
@@ -91,13 +105,13 @@ class _HomePageState extends State<HomePage> {
                 ),
                 itemBuilder: (BuildContext context, int index) {
                   return ItemMovieWidget(
-                    movie: moviesModel[index],
+                    movie: listMoviesModel[index],
                     onTap: () {
                       Navigator.pushNamed(
                         context,
                         "detail",
                         arguments: MovieArgumentModel(
-                          id: moviesModel[index].id,
+                          id: listMoviesModel[index].id,
                         ),
                       );
                     },
@@ -109,5 +123,11 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _movieScrollController.dispose();
   }
 }
